@@ -1,141 +1,290 @@
-"use client";
+'use client';
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react';
+import { Upload, X, Send, FileText, ImageIcon } from 'lucide-react'; // ensure lucide-react is installed
 
-const TOOLS = [
-  { id: "summarizer", label: "Summarizer" },
-  { id: "codegen", label: "Code Generator" },
-  { id: "translator", label: "Translator" },
-  { id: "image", label: "Image Analyzer" },
-  { id: "qa", label: "Q & A" },
+type Tool = { id: string; label: string };
+const TOOLS: Tool[] = [
+  { id: 'summarizer', label: 'Summarizer' },
+  { id: 'codegen', label: 'Code Generator' },
+  { id: 'translator', label: 'Translator' },
+  { id: 'image', label: 'Image Analyzer' },
+  { id: 'qa', label: 'Q & A' },
 ];
 
-const page = () => {
-const [query, setQuery] = useState("");
-const [tool, setTool] = useState(TOOLS[0].id);
-const [file, setFile] = useState<File | null>(null);
+export default function HomePage() {
+  const [query, setQuery] = useState('');
+  const [tool, setTool] = useState<string>(TOOLS[0].id);
+  const [file, setFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-const handlesubmit = (e: React.FormEvent) => {
-  e.preventDefault()
-  console.log('variables query isss: ', query)
-  console.log('variables tool isss: ', tool)
-  console.log('variables file isss: ', file)
-}
+  useEffect(() => {
+    // focus shorthand: press "/" to focus the input
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === '/' && (document.activeElement as HTMLElement)?.tagName !== 'INPUT') {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  async function handleSubmit(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    if (!query.trim() && !file) return;
+    setIsSubmitting(true);
+
+    // TODO: replace with real API call
+    console.log({ query, tool, file });
+    await new Promise((r) => setTimeout(r, 700));
+    setIsSubmitting(false);
+    setQuery(''); // keep or clear depending on desired UX
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement> | null) {
+    const f = e?.target?.files?.[0] ?? null;
+    if (f) setFile(f);
+  }
+
+  function removeFile() {
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    inputRef.current?.focus();
+  }
 
   return (
-    <div>
-      <form onSubmit={(e) => { handlesubmit(e) }} className="flex flex-col gap-3">
-        <select
-          name="tools"
-          id="tools"
-          value={tool}
-          onChange={(e)=>{setTool(e.target.value)}}
-        >
-          {
-            TOOLS.map((tool, index) => (
-              <option value={tool.id} key={index}>{tool.label}</option>
-            ))
-          }
-        </select>
-        <input
-          type="text"
-          placeholder="enter query.."
-          value={query}
-          onChange={(e) => { setQuery(e.target.value) }}
-        />
-        <input
-          type="file"
-          onChange={(e)=>{setFile(e.target.files?.[0] ?? null)}} />
-        <button type="submit">submit</button>
-      </form>
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white flex items-center justify-center p-6">
+      <main className="w-full max-w-3xl">
+        <div className="mx-auto p-6 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl">
+          <header className="text-center mb-6">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">
+              AI Assistant
+            </h1>
+            <p className="mt-2 text-sm text-gray-300">
+              Pick a tool, attach a file (optional), or type your request. Press <kbd className="px-2 py-1 rounded bg-white/6">/</kbd> to focus.
+            </p>
+          </header>
+
+          <form onSubmit={handleSubmit} className="space-y-5" aria-label="AI assistant form">
+            {/* TOOL SELECTOR: chips + native select fallback */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm text-gray-400">Tool</label>
+                <span className="text-xs text-gray-400">Choose how the assistant should respond</span>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mb-3">
+                {TOOLS.map((t) => (
+                  <ToolChip key={t.id} active={tool === t.id} onClick={() => setTool(t.id)}>
+                    {t.label}
+                  </ToolChip>
+                ))}
+              </div>
+
+              {/* accessible select for keyboard-only users or mobile */}
+              <select
+                value={tool}
+                onChange={(e) => setTool(e.target.value)}
+                className="w-full md:hidden bg-gray-900/60 text-white border border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 transition"
+                aria-label="Select tool"
+              >
+                {TOOLS.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* INPUT ROW */}
+            <div className="flex items-start gap-3">
+              <div className="flex-1 relative">
+                <span className="absolute left-3 top-3 pointer-events-none text-gray-400">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 21l-4.35-4.35" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="11" cy="11" r="6" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+
+                <input
+                  ref={inputRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={getPlaceholder(tool)}
+                  className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 border border-white/8 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition placeholder:text-gray-400"
+                  aria-label="Type your request"
+                />
+                <div className="absolute right-3 top-3 text-xs text-gray-400">{toolBadgeLabel(tool)}</div>
+              </div>
+
+              {/* file attach + send */}
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="file"
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/4 hover:bg-white/6 cursor-pointer border border-white/8 transition"
+                  title="Attach a file"
+                >
+                  <Upload size={16} className="text-gray-200" />
+                  <span className="hidden sm:inline text-sm text-gray-200">Attach</span>
+                  <input
+                    id="file"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,text/*,application/pdf"
+                    onChange={(e) => handleFileChange(e)}
+                    className="hidden"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold shadow-lg transform active:scale-95 transition ${
+                    isSubmitting ? 'bg-indigo-500/70 cursor-wait' : 'bg-gradient-to-r from-blue-400 to-indigo-500 text-black'
+                  }`}
+                  aria-disabled={isSubmitting}
+                >
+                  <Send size={16} />
+                  {isSubmitting ? 'Processing…' : 'Send'}
+                </button>
+              </div>
+            </div>
+
+            {/* file preview */}
+            {file && (
+              <div className="flex items-center justify-between bg-white/4 border border-white/8 p-3 rounded-md">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-md bg-white/6 flex items-center justify-center border border-white/8">
+                    {isImage(file) ? <ImageIcon size={18} /> : <FileText size={18} />}
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-medium">{file.name}</div>
+                    <div className="text-xs text-gray-300">{formatBytes(file.size)}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={removeFile}
+                    className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-red-600/80 hover:bg-red-600 transition"
+                  >
+                    <X size={14} /> Remove
+                  </button>
+                </div>
+              </div>
+            )}
+          </form>
+
+          <footer className="mt-6 text-xs text-gray-400 text-center">
+            Pro tip: pick a tool for tailored responses. Want a results preview panel next? I can add it.
+          </footer>
+        </div>
+      </main>
     </div>
-  )
+  );
 }
 
-export default page
+/* ---------- Helper & small UI components ---------- */
+
+function ToolChip({ children, active, onClick }: { children: React.ReactNode; active?: boolean; onClick?: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      type="button"
+      aria-pressed={active}
+      className={`text-sm px-3 py-1 rounded-full transition select-none ${
+        active ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md' : 'bg-white/3 text-gray-200 hover:bg-white/5'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function getPlaceholder(toolId: string) {
+  switch (toolId) {
+    case 'summarizer':
+      return 'Paste text or attach a document to summarize...';
+    case 'codegen':
+      return 'Describe what you want the code to do (language, inputs, etc.)';
+    case 'translator':
+      return 'Type text to translate and optionally specify target language (e.g., "to Spanish")';
+    case 'image':
+      return 'Attach an image to analyze or ask a question about it';
+    case 'qa':
+      return 'Ask a question — include context for better answers';
+    default:
+      return 'Type your request...';
+  }
+}
+
+function toolBadgeLabel(toolId: string) {
+  const t = TOOLS.find((x) => x.id === toolId);
+  return t ? t.label : '';
+}
+
+function isImage(f: File) {
+  return f.type.startsWith('image/');
+}
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${kb.toFixed(1)} KB`;
+  const mb = kb / 1024;
+  if (mb < 1024) return `${mb.toFixed(1)} MB`;
+  return `${(mb / 1024).toFixed(1)} GB`;
+}
 
 
 
-// export default function HomePage(){
-//   const [query, setQuery] = useState("");
-//   const [tool, setTool] = useState(TOOLS[0].id);
-//   const [file, setFile] = useState<File | null>(null);
-//   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-//   function handleSubmit(e?: React.FormEvent) {
-//     if (e) e.preventDefault();
-//     if (!query && !file) return;
 
-//     // Replace with actual API call
-//     console.log({ query, tool, file });
 
-//     setQuery("");
-//   }
 
-//   function handleFileChange(e: React.ChangeEvent<HTMLInputElement> | null) {
-//     const f = e?.target?.files?.[0] ?? null;
-//     if (f) setFile(f);
-//   }
+// const page = () => {
+// const [query, setQuery] = useState("");
+// const [tool, setTool] = useState(TOOLS[0].id);
+// const [file, setFile] = useState<File | null>(null);
 
-//   function removeFile() {
-//     setFile(null);
-//     // if (fileInputRef.current) fileInputRef.current.value = "";
-//   }
+// const handlesubmit = (e: React.FormEvent) => {
+//   e.preventDefault()
+//   console.log('variables query isss: ', query)
+//   console.log('variables tool isss: ', tool)
+//   console.log('variables file isss: ', file)
+// }
 
 //   return (
-//     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-6">
-//       <div className="w-full max-w-xl bg-gray-800 border border-gray-700 rounded-lg p-6">
-//         <h1 className="text-xl font-medium mb-4">AI Assistant</h1>
-
-//         <form onSubmit={(e) => handleSubmit(e)} className="space-y-4">
-//           <div>
-//             <label htmlFor="tool" className="block text-sm text-gray-300 mb-1">Tool</label>
-//             <select
-//               id="tool"
-//               value={tool}
-//               onChange={(e) => setTool(e.target.value)}
-//               className="w-full bg-gray-900 text-white border border-gray-700 rounded px-3 py-2"
-//             >
-//               {TOOLS.map((t) => (
-//                 <option key={t.id} value={t.id} className="bg-gray-900 text-white">
-//                   {t.label}
-//                 </option>
-//               ))}
-//             </select>
-//           </div>
-
-//           <div>
-//             <label htmlFor="query" className="block text-sm text-gray-300 mb-1">Input</label>
-//             <input
-//               id="query"
-//               value={query}
-//               onChange={(e) => setQuery(e.target.value)}
-//               placeholder="Type your request..."
-//               className="w-full bg-gray-900 text-white border border-gray-700 rounded px-3 py-2"
-//             />
-//           </div>
-
-//           <div>
-//             <label className="block text-sm text-gray-300 mb-1">Attach file (optional)</label>
-//             <div className="flex gap-2">
-//               <label className="flex-1 bg-gray-900 text-white border border-gray-700 rounded px-3 py-2 text-sm text-left cursor-pointer">
-//                 <input ref={fileInputRef} type="file" onChange={(e) => handleFileChange(e)} className="hidden" />
-//                 {file ? file.name : "Choose file..."}
-//               </label>
-
-//               {file && (
-//                 <button type="button" onClick={removeFile} className="px-3 py-2 bg-gray-700 border border-gray-600 rounded">
-//                   Remove
-//                 </button>
-//               )}
-//             </div>
-//           </div>
-
-//           <div className="text-right">
-//             <button type="submit" className="bg-white text-black px-4 py-2 rounded">Send</button>
-//           </div>
-//         </form>
-//       </div>
+//     <div>
+//       <form onSubmit={(e) => { handlesubmit(e) }} className="flex flex-col gap-3">
+//         <select
+//           name="tools"
+//           id="tools"
+//           value={tool}
+//           onChange={(e)=>{setTool(e.target.value)}}
+//         >
+//           {
+//             TOOLS.map((tool, index) => (
+//               <option value={tool.id} key={index}>{tool.label}</option>
+//             ))
+//           }
+//         </select>
+//         <input
+//           type="text"
+//           placeholder="enter query.."
+//           value={query}
+//           onChange={(e) => { setQuery(e.target.value) }}
+//         />
+//         <input
+//           type="file"
+//           onChange={(e)=>{setFile(e.target.files?.[0] ?? null)}} />
+//         <button type="submit">submit</button>
+//       </form>
 //     </div>
-//   );
+//   )
 // }
+
+// export default page
