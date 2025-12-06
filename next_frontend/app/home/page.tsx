@@ -58,15 +58,15 @@ const Homepage = () => {
         <div className="relative overflow-hidden rounded-2xl p-8 bg-white border border-slate-200 shadow-xl">
 
           {/* light funky blobs */}
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-pink-300/30 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-yellow-300/30 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-300/30 rounded-full blur-3xl pointer-events-none"></div>
 
           <header className="mb-6 text-center">
-            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-400">
-              RAG Chatbot
+            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-300">
+              RAG Assistant — Upload & Search Knowledge
             </h1>
-            <p className="mt-2 text-gray-600 text-sm">
-              Choose a mode and upload a PDF or paste a website URL.
+            <p className="mt-2 text-gray-400 text-sm bg-zinc-100 p-2 rounded-md">
+              Ingest documents or web pages to create a searchable knowledge base. Upload a PDF or paste a website URL to index content and ask questions.
             </p>
           </header>
 
@@ -80,11 +80,10 @@ const Homepage = () => {
                   type="button"
                   id="pdf"
                   onClick={(e) => handleTool(e, 'pdf')}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold transition shadow-sm ${
-                    tool === 'pdf'
-                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
-                      : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200'
-                  }`}
+                  className={`flex-1 px-5 py-7 rounded-md text-sm font-semibold transition shadow-sm ${tool === 'pdf'
+                    ? 'bg-gradient-to-r from-blue-300 to-blue-300 text-white shadow-md hover:scale-105'
+                    : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200'
+                    }`}
                 >
                   PDF
                 </button>
@@ -93,11 +92,10 @@ const Homepage = () => {
                   type="button"
                   id="website"
                   onClick={(e) => handleTool(e, 'website')}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold transition shadow-sm ${
-                    tool === 'website'
-                      ? 'bg-gradient-to-r from-yellow-300 to-yellow-400 text-white shadow-md'
-                      : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200'
-                  }`}
+                  className={`flex-1 px-5 py-2 rounded-md text-sm font-semibold transition shadow-sm ${tool === 'website'
+                    ? 'bg-gradient-to-r from-yellow-300 to-yellow-300 text-white shadow-md hover:scale-105'
+                    : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200'
+                    }`}
                 >
                   WEBSITE
                 </button>
@@ -107,7 +105,7 @@ const Homepage = () => {
             {/* INPUT FIELD */}
             <div>
               <label className="text-sm text-gray-600 font-medium mb-1 inline-block">
-                {tool === 'website' ? 'Website URL' : 'Upload PDF'}
+                {tool === 'website' ? 'Website URL to crawl & index' : 'Upload PDF to index'}
               </label>
 
               {tool === 'website' ? (
@@ -124,7 +122,7 @@ const Homepage = () => {
               ) : (
                 <div className="flex items-center gap-3 w-full px-1 bg-slate-50 border border-slate-300 rounded-xl shadow-sm">
                   <label className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-slate-100 transition rounded-lg p-2">
-                     <Plus className="text-zinc-400" />
+                    <Plus className="text-zinc-400" />
                     <div className="flex-1">
                       <div className="text-sm text-slate-700">
                         {uploadedfile ? uploadedfile.name : 'Choose a PDF file'}
