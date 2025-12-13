@@ -57,7 +57,7 @@ const Homepage = () => {
         formData.append('websiteUrl', websiteUrl)
       }
 
-      const response = await axios.post('/api/submit_context', formData, {
+      const response = await axios.post('http://localhost:8000/api/context', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -198,7 +198,7 @@ const Homepage = () => {
           <div className="border-t border-zinc-200 bg-white/60 p-4 flex gap-3">
             <input
               placeholder="Ask something..."
-              className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
+              className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400 text-black"
             />
             <button className="rounded-xl bg-black p-3 text-white hover:bg-zinc-900 shadow">
               <Send size={18} />
