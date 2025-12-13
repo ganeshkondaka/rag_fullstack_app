@@ -1,174 +1,125 @@
 'use client'
 import React, { useState } from 'react'
 import axios from 'axios'
-import { Link, Plus } from 'lucide-react'
+import { Link, Plus, Send } from 'lucide-react'
+import ConfigureApiKeyDialog from '@/components/ConfigureApiKeyDialog'
 
 const Homepage = () => {
-  const [tool, setTool] = useState('pdf')
+  const [tool, setTool] = useState<'pdf' | 'website'>('pdf')
   const [websiteUrl, setWebsiteUrl] = useState('')
   const [uploadedfile, setUploadedfile] = useState<File | null>(null)
-
-  const handleTool = (e: React.FormEvent, id: string) => {
-    e.preventDefault()
-    const changedTool = (id == "pdf" ? "pdf" : "website")
-    setTool(changedTool)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (tool == 'pdf' && uploadedfile) {
-      const formdata = new FormData()
-      formdata.append('file', uploadedfile)
-      formdata.append('tool', tool)
-
-      console.log('website submitted formdata issss', formdata)
-      try {
-        const response = await axios.post('localhost:3000/upload', formdata)
-        console.log('uploaded succesfully', response.data)
-      } catch (error) {
-        console.log('upload failed..', error)
-      }
-
-    } else if (tool == 'website' && websiteUrl) {
-      console.log('website submitted', websiteUrl, 'tool iss', tool)
-      try {
-        const response = await axios.post('localhost:3000/upload', { websiteUrl, tool })
-        console.log("website url sent successfully", response.data)
-      } catch (error) {
-        console.log('websiteurl submission failed..', error)
-      }
-
-    }
-  }
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement> | null) {
-    const f = e?.target?.files?.[0] ?? null
-    if (f) setUploadedfile(f)
-  }
-
-  function removeFile() {
-    setUploadedfile(null)
-  }
-  console.log('tool outside--- issss', tool)
+  const [showApiDialog, setShowApiDialog] = useState(false)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-slate-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-2xl">
-        <div className="relative overflow-hidden rounded-2xl p-8 bg-white border border-slate-200 shadow-xl">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-100 to-zinc-200 p-6">
+      <div className="mx-auto max-w-7xl grid grid-cols-12 gap-6 h-[calc(100vh-3rem)]">
 
-          {/* light funky blobs */}
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-yellow-300/30 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-300/30 rounded-full blur-3xl pointer-events-none"></div>
+        {/* LEFT PANEL */}
+        <div className="col-span-4 rounded-3xl bg-white/80 backdrop-blur border border-zinc-200 shadow-lg p-6 flex flex-col">
+          <h1 className="text-xl font-semibold text-zinc-900">
+            RAG Assistant
+          </h1>
+          <p className="text-xs text-zinc-500 mt-1 mb-6">
+            - Upload content or crawl a website and get details.
+          </p>
 
-          <header className="mb-6 text-center">
-            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-300">
-              RAG Assistant — Upload & Search Knowledge
-            </h1>
-            <p className="mt-2 text-gray-400 text-sm bg-zinc-100 p-2 rounded-md">
-              Ingest documents or web pages to create a searchable knowledge base. Upload a PDF or paste a website URL to index content and ask questions.
-            </p>
-          </header>
-
-          <form onSubmit={(e) => handleSubmit(e)} className="flex flex-col gap-6">
-
-            {/* TOOLS */}
-            <div>
-              <label className="text-sm text-gray-600 font-medium">Select mode</label>
-              <div className="flex gap-3 mt-2">
-                <button
-                  type="button"
-                  id="pdf"
-                  onClick={(e) => handleTool(e, 'pdf')}
-                  className={`flex-1 px-5 py-7 rounded-md text-sm font-semibold transition shadow-sm ${tool === 'pdf'
-                    ? 'bg-gradient-to-r from-blue-300 to-blue-300 text-white shadow-md hover:scale-105'
-                    : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200'
-                    }`}
-                >
-                  PDF
-                </button>
-
-                <button
-                  type="button"
-                  id="website"
-                  onClick={(e) => handleTool(e, 'website')}
-                  className={`flex-1 px-5 py-2 rounded-md text-sm font-semibold transition shadow-sm ${tool === 'website'
-                    ? 'bg-gradient-to-r from-yellow-300 to-yellow-300 text-white shadow-md hover:scale-105'
-                    : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200'
-                    }`}
-                >
-                  WEBSITE
-                </button>
-              </div>
-            </div>
-
-            {/* INPUT FIELD */}
-            <div>
-              <label className="text-sm text-gray-600 font-medium mb-1 inline-block">
-                {tool === 'website' ? 'Website URL to crawl & index' : 'Upload PDF to index'}
-              </label>
-
-              {tool === 'website' ? (
-                <div className="relative">
-                  <Link className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    key={'text'}
-                    value={websiteUrl}
-                    onChange={(e) => setWebsiteUrl(e.target.value)}
-                    placeholder="https://example.com"
-                    className="w-full pl-10 pr-4 py-3 text-zinc-800 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:ring-1 focus:ring-zinc-200 outline-none"
-                  />
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 w-full px-1 bg-slate-50 border border-slate-300 rounded-xl shadow-sm">
-                  <label className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-slate-100 transition rounded-lg p-2">
-                    <Plus className="text-zinc-400" />
-                    <div className="flex-1">
-                      <div className="text-sm text-slate-700">
-                        {uploadedfile ? uploadedfile.name : 'Choose a PDF file'}
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        {uploadedfile ? `${(uploadedfile.size / 1024).toFixed(0)} KB` : 'Only .pdf allowed'}
-                      </div>
-                    </div>
-                    <input
-                      key={'file'}
-                      type="file"
-                      accept=".pdf"
-                      onChange={(e) => handleFileChange(e)}
-                      className="hidden"
-                    />
-                  </label>
-                  {uploadedfile && (
-                    <button
-                      type="button"
-                      onClick={removeFile}
-                      className="text-sm px-3 py-1 bg-red-400 text-white rounded-lg shadow hover:bg-red-500 transition"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* SUBMIT */}
-            <div className="flex justify-end">
+          {/* TOOL SELECT */}
+          <div className="flex gap-2 mb-6">
+            {['pdf', 'website'].map((id) => (
               <button
-                type="submit"
-                className="px-6 py-2 rounded-xl font-semibold text-white bg-gradient-to-r from-indigo-500 to-blue-500 shadow-md hover:shadow-lg hover:scale-[1.02] transition-transform"
+                key={id}
+                onClick={() => setTool(id as any)}
+                className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition
+                  ${tool === id
+                    ? 'bg-black text-white shadow'
+                    : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
+                  }`}
               >
-                Submit
+                {id.toUpperCase()}
               </button>
-            </div>
-          </form>
-
-          <div className="text-xs text-gray-500 mt-4">
-            Debug: tool = <span className="font-semibold text-blue-600">{tool}</span>
+            ))}
           </div>
 
+          {/* INPUT */}
+          <div className="mb-6">
+            {tool === 'website' ? (
+              <div className="relative">
+                <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black" />
+                <input
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-zinc-300 bg-zinc-50 outline-none focus:ring-2 focus:ring-zinc-400 text-black"
+                />
+              </div>
+            ) : (
+              <label className="flex items-center gap-3 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-4 cursor-pointer hover:bg-zinc-100 transition">
+                <Plus className="text-zinc-500" />
+                <div>
+                  <div className="text-sm text-zinc-700">
+                    {uploadedfile ? uploadedfile.name : 'Upload PDF'}
+                  </div>
+                  <div className="text-xs text-zinc-500">
+                    Only .pdf files supported
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  hidden
+                  onChange={(e) => setUploadedfile(e.target.files?.[0] ?? null)}
+                />
+              </label>
+            )}
+          </div>
+
+          {/* CONFIG API */}
+          <button
+            onClick={() => setShowApiDialog(true)}
+            className="rounded-xl border border-zinc-300 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 transition"
+          >
+            Configure API Key
+          </button>
+
+          {/* SUBMIT */}
+          <button
+            className="mt-auto rounded-xl bg-black px-4 py-3 text-sm font-medium text-white hover:bg-zinc-900 shadow-md"
+          >
+            Ingest Knowledge
+          </button>
+        </div>
+
+        {/* RIGHT PANEL – CHAT */}
+        <div className="col-span-8 rounded-3xl bg-white/80 backdrop-blur border border-zinc-200 shadow-lg flex flex-col overflow-hidden">
+
+          {/* CHAT AREA */}
+          <div className="flex-1 p-6 space-y-4 overflow-y-auto">
+            <div className="max-w-xl rounded-2xl bg-zinc-100 p-4 text-sm text-zinc-800 shadow-sm">
+              Upload a source and start asking questions.
+            </div>
+
+            <div className="max-w-xl ml-auto rounded-2xl bg-black text-white p-4 text-sm shadow">
+              What does this document talk about?
+            </div>
+          </div>
+
+          {/* INPUT */}
+          <div className="border-t border-zinc-200 bg-white/60 p-4 flex gap-3">
+            <input
+              placeholder="Ask something..."
+              className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
+            />
+            <button className="rounded-xl bg-black p-3 text-white hover:bg-zinc-900 shadow">
+              <Send size={18} />
+            </button>
+          </div>
         </div>
       </div>
+
+      <ConfigureApiKeyDialog
+        open={showApiDialog}
+        onClose={() => setShowApiDialog(false)}
+      />
     </div>
   )
 }
