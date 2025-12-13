@@ -7,10 +7,15 @@ interface Props {
 }
 
 const ConfigureApiKeyDialog: React.FC<Props> = ({ open, onClose }) => {
-  const [provider, setProvider] = useState<'openai' | 'gemini'>('openai')
+  const [model, setModel] = useState<'openai' | 'gemini'>('openai')
   const [apiKey, setApiKey] = useState('')
 
   if (!open) return null
+  const handleKeysave = ()=>{
+    localStorage.setItem('rag-model', model)
+    localStorage.setItem('rag-apiKey', apiKey)
+    onClose()
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -23,30 +28,49 @@ const ConfigureApiKeyDialog: React.FC<Props> = ({ open, onClose }) => {
         </p>
 
         <div className="mt-6 space-y-4">
+          {/* PROVIDER */}
           <div>
-            <label className="text-xs font-medium text-zinc-600">
+            <label className="text-xs font-medium text-zinc-700">
               Provider
             </label>
             <select
-              value={provider}
-              onChange={(e) => setProvider(e.target.value as any)}
-              className="mt-1 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
+              value={model}
+              onChange={(e) => setModel(e.target.value as any)}
+              className="
+                mt-1 w-full rounded-xl border border-zinc-300 
+                bg-white px-3 py-2 text-sm text-black
+                outline-none focus:ring-2 focus:ring-zinc-400
+                cursor-pointer
+              "
             >
-              <option value="openai">OpenAI</option>
-              <option value="gemini">Gemini</option>
+              <option value="openai" className="text-black bg-white">
+                OpenAI
+              </option>
+              <option value="gemini" className="text-black bg-white">
+                Gemini
+              </option>
             </select>
           </div>
 
+          {/* API KEY */}
           <div>
-            <label className="text-xs font-medium text-zinc-600">
+            <label className="text-xs font-medium text-zinc-700">
               API Key
             </label>
             <input
-              type="password"
+              type="text"
+              required
+              autoComplete="off"
+              autoCorrect="off"
               value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              onChange={(e) => setApiKey((e.target.value).toLowerCase())}
               placeholder="sk-••••••••••••"
-              className="mt-1 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
+              className="
+                mt-1 w-full rounded-xl border border-zinc-300
+                bg-white px-3 py-2 text-sm text-black
+                placeholder-zinc-400
+                outline-none focus:ring-2 focus:ring-zinc-400
+              "
             />
           </div>
         </div>
@@ -59,7 +83,7 @@ const ConfigureApiKeyDialog: React.FC<Props> = ({ open, onClose }) => {
             Cancel
           </button>
           <button
-            onClick={onClose}
+            onClick={handleKeysave}
             className="px-5 py-2 text-sm rounded-xl bg-black text-white hover:bg-zinc-900 shadow"
           >
             Save Key
