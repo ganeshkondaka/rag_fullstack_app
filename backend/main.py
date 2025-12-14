@@ -3,6 +3,10 @@ from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from typing import Optional
+from loader import Load_pdf
+from chunker import Chunk_docs
+from vector_embedder import Vector_embedder
+from langchain_qdrant import QdrantVectorStore
 
 
 load_dotenv()
@@ -30,6 +34,17 @@ async def context_data(
         print('file is: ', file)
         print('apiKey is: ', apiKey)
         print('model is: ', model)
+        
+        loaded_docs = Load_pdf(tool,file)
+        split_docs = Chunk_docs(tool,loaded_docs)
+        Vector_embedder(model,apiKey)
+        
+        vector_store = QdrantVectorStore.from_documents(
+            documents=split_docs,
+            embedding=embedding_model,
+            url="http://localhost:6333",
+            collection_name=f"learning_vectors_{provider}"
+        )
         # # Validate tool type
         # if tool not in ['pdf', 'website']:
         #     raise HTTPException(status_code=400, detail="Invalid tool type")
