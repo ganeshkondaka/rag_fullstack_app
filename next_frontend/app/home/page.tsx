@@ -165,6 +165,7 @@ const Homepage = () => {
           {/* CONFIG API */}
           <button
             onClick={() => setShowApiDialog(true)}
+            type='button'
             className="rounded-xl border border-zinc-300 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 transition"
           >
             Configure API Key

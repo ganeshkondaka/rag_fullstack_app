@@ -3,9 +3,9 @@ from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from typing import Optional
-from loader import Load_pdf
-from chunker import Chunk_docs
-from vector_embedder import Vector_embedder
+from utils.loader import Load_pdf
+from utils.chunker import Chunk_docs
+from utils.vector_embedder import Vector_embedder
 from langchain_qdrant import QdrantVectorStore
 
 
@@ -29,57 +29,74 @@ async def context_data(
     websiteUrl: Optional[str] = Form(None)
 ):
     try:
+        print('=== STARTING CONTEXT DATA PROCESSING ===')
         print('tool is: ', tool)
         print('websiteUrl is: ', websiteUrl)
         print('file is: ', file)
         print('apiKey is: ', apiKey)
         print('model is: ', model)
-        
-        loaded_docs = Load_pdf(tool,file)
-        split_docs = Chunk_docs(tool,loaded_docs)
-        Vector_embedder(model,apiKey)
-        
-        vector_store = QdrantVectorStore.from_documents(
-            documents=split_docs,
-            embedding=embedding_model,
-            url="http://localhost:6333",
-            collection_name=f"learning_vectors_{provider}"
-        )
-        # # Validate tool type
-        # if tool not in ['pdf', 'website']:
-        #     raise HTTPException(status_code=400, detail="Invalid tool type")
 
-        # # Validate required fields based on tool
-        # if tool == 'pdf' and not file:
-        #     raise HTTPException(status_code=400, detail="PDF file is required")
-        # if tool == 'website' and not websiteUrl:
-        #     raise HTTPException(status_code=400, detail="Website URL is required")
+        # Validate tool type
+        if tool not in ['pdf', 'website']:
+            raise HTTPException(status_code=400, detail="Invalid tool type")
 
-        # # Set environment variables for this request
-        # os.environ['API_KEY'] = apiKey
-        # os.environ['MODEL'] = model
+        # Validate required fields based on tool
+        if tool == 'pdf' and not file:
+            raise HTTPException(status_code=400, detail="PDF file is required")
+        if tool == 'website' and not websiteUrl:
+            raise HTTPException(status_code=400, detail="Website URL is required")
 
-        # result = {"status": "success", "tool": tool}
+        print('✓ Form validation completed')
+        result = {"status": "success", "tool": tool}
 
-        # if tool == 'pdf' and file:
-        #     # Save uploaded file temporarily
-        #     file_path = f"temp_{file.filename}"
-        #     with open(file_path, "wb") as buffer:
-        #         content = await file.read()
-        #         buffer.write(content)
+        if tool == 'pdf' and file:
+            print('=== STARTING PDF PROCESSING ===')
+            # Save uploaded file temporarily
+            file_path = f"temp_{file.filename}"
+            with open(file_path, "wb") as buffer:
+                content = await file.read()
+                buffer.write(content)
+            print(f'✓ File saved temporarily: {file_path}')
 
-        #     result["file_name"] = file.filename
-        #     result["file_size"] = len(content)
-        #     result["message"] = "PDF uploaded successfully"
+            # Process the PDF
+            loaded_docs = Load_pdf(tool, file_path)
+            print(f'✓ PDF loaded: {len(loaded_docs)} documents')
 
-        #     # Add PDF processing logic here using indexing.py
+            split_docs = Chunk_docs(tool, loaded_docs)
+            print(f'✓ Documents chunked: {len(split_docs)} chunks')
 
-        # elif tool == 'website' and websiteUrl:
-        #     result["website_url"] = websiteUrl
-        #     result["message"] = "Website URL received successfully"
-        #     # Add website crawling logic here
+            embedding_model = Vector_embedder(model, apiKey)
+            print('✓ Embedding model created')
 
-        # return result
+            # Create vector store
+            vector_store = QdrantVectorStore.from_documents(
+                documents=split_docs,
+                url="http://localhost:6333",
+                embedding=embedding_model,
+                collection_name=f"rag_pdf_{model}"
+            )
+            print('✓ Vector store created/updated')
+
+            result["file_name"] = file.filename
+            result["file_size"] = len(content)
+            result["message"] = "PDF processed and indexed successfully"
+            result["chunks_created"] = len(split_docs)
+
+            # Clean up temp file
+            os.remove(file_path)
+            print('✓ Temporary file cleaned up')
+            print('=== PDF PROCESSING COMPLETED ===')
+
+        elif tool == 'website' and websiteUrl:
+            print('=== STARTING WEBSITE PROCESSING ===')
+            result["website_url"] = websiteUrl
+            result["message"] = "Website URL received successfully"
+            # TODO: Add website crawling logic here
+            print('✓ Website URL processed')
+            print('=== WEBSITE PROCESSING COMPLETED ===')
+
+        print('=== CONTEXT DATA PROCESSING COMPLETED ===')
+        return result
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

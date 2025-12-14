@@ -63,7 +63,7 @@ const ConfigureApiKeyDialog: React.FC<Props> = ({ open, onClose }) => {
               autoComplete="off"
               autoCorrect="off"
               value={apiKey}
-              onChange={(e) => setApiKey((e.target.value).toLowerCase())}
+              onChange={(e) => setApiKey((e.target.value))}
               placeholder="sk-••••••••••••"
               className="
                 mt-1 w-full rounded-xl border border-zinc-300
@@ -84,6 +84,7 @@ const ConfigureApiKeyDialog: React.FC<Props> = ({ open, onClose }) => {
           </button>
           <button
             onClick={handleKeysave}
+            type='button'
             className="px-5 py-2 text-sm rounded-xl bg-black text-white hover:bg-zinc-900 shadow"
           >
             Save Key
