@@ -10,6 +10,7 @@ const Homepage = () => {
   const [websiteUrl, setWebsiteUrl] = useState('')
   const [uploadedfile, setUploadedfile] = useState<File | null>(null)
   const [showApiDialog, setShowApiDialog] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleTool = (e: React.FormEvent, id: string) => {
     e.preventDefault()
@@ -47,6 +48,7 @@ const Homepage = () => {
     // console.log('apiKey is: ', apiKey)
     // console.log('model is: ', model)
     try {
+      setIsLoading(true)
       const formData = new FormData()
       formData.append('tool', tool)
       formData.append('apiKey', apiKey!)
@@ -64,8 +66,14 @@ const Homepage = () => {
         },
       })
       console.log('data sent to api formadata is: ', formData)
+      alert('Successfully processed!')
+      setUploadedfile(null)
+      setWebsiteUrl('')
     } catch (error) {
-      // console.error('Error submitting:', error)
+      console.error('Error submitting:', error)
+      alert('Error processing file. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -76,7 +84,22 @@ const Homepage = () => {
         {/* LEFT PANEL */}
         <form
           onSubmit={handleSubmit}
-          className="col-span-4 rounded-3xl bg-white/90 backdrop-blur border border-zinc-200 shadow-lg p-6 flex flex-col">
+          className={`col-span-4 rounded-3xl bg-white/90 backdrop-blur border border-zinc-200 shadow-lg p-6 flex flex-col transition-all ${
+            isLoading ? 'opacity-50 pointer-events-none' : ''
+          }`}
+        >
+          {isLoading && (
+            <div className="absolute inset-0 rounded-3xl bg-black/10 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex gap-1">
+                  <div className="w-2 h-8 bg-white rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                  <div className="w-2 h-8 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-8 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
+                <p className="text-white text-sm font-medium">Processing...</p>
+              </div>
+            </div>
+          )}
           <h1 className="text-xl font-semibold text-zinc-900">
             RAG Assistant
           </h1>
@@ -178,9 +201,14 @@ const Homepage = () => {
           {/* SUBMIT */}
           <button
             type='submit'
-            className="mt-auto rounded-xl bg-black px-4 py-3 text-sm font-medium text-white hover:bg-zinc-900 shadow-md"
+            disabled={isLoading}
+            className={`mt-auto rounded-xl px-4 py-3 text-sm font-medium shadow-md transition ${
+              isLoading
+                ? 'bg-zinc-400 text-gray-600 cursor-not-allowed'
+                : 'bg-black text-white hover:bg-zinc-900'
+            }`}
           >
-            Submit
+            {isLoading ? 'Processing...' : 'Submit'}
           </button>
         </form>
 
