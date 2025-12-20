@@ -1,8 +1,9 @@
 'use client'
 import React, { useState } from 'react'
 import axios from 'axios'
-import { Link, Plus, Send } from 'lucide-react'
+import { Link, Plus } from 'lucide-react'
 import ConfigureApiKeyDialog from '@/components/ConfigureApiKeyDialog'
+import ChatPanel from '@/components/ChatPanel'
 
 const Homepage = () => {
   const [tool, setTool] = useState('pdf')
@@ -183,29 +184,7 @@ const Homepage = () => {
           </button>
         </form>
 
-        {/* RIGHT PANEL – CHAT */}
-        <div className="col-span-8 rounded-3xl bg-white/90 backdrop-blur border border-zinc-200 shadow-lg flex flex-col overflow-hidden">
-
-          <div className="flex-1 p-6 space-y-4 overflow-y-auto">
-            <div className="max-w-xl rounded-2xl bg-zinc-100 p-4 text-sm text-zinc-800 shadow-sm">
-              Upload a source and ask questions here.
-            </div>
-
-            <div className="max-w-xl ml-auto rounded-2xl bg-black text-white p-4 text-sm shadow">
-              What is this document about?
-            </div>
-          </div>
-
-          <div className="border-t border-zinc-200 bg-white/60 p-4 flex gap-3">
-            <input
-              placeholder="Ask something..."
-              className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400 text-black"
-            />
-            <button className="rounded-xl bg-black p-3 text-white hover:bg-zinc-900 shadow">
-              <Send size={18} />
-            </button>
-          </div>
-        </div>
+        <ChatPanel />
       </div>
 
       <ConfigureApiKeyDialog

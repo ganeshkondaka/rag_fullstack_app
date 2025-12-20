@@ -1,16 +1,23 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import os
 from typing import Optional
 from utils.loader import Load_pdf
 from utils.chunker import Chunk_docs
 from utils.vector_embedder import Vector_embedder
+from utils.chat_completion import chat_completion
 from langchain_qdrant import QdrantVectorStore
 
 
 load_dotenv()
 app = FastAPI()
+
+class ChatRequest(BaseModel):
+    model: str
+    apiKey: str
+    userquery: str
 
 app.add_middleware(
      CORSMiddleware,
@@ -58,7 +65,7 @@ async def context_data(
                 buffer.write(content)
             print(f'✓ File saved temporarily: {file_path}')
 
-            # Process the PDF
+            # Process the PDF-----------------------
             loaded_docs = Load_pdf(tool, file_path)
             print(f'✓ PDF loaded: {len(loaded_docs)} documents')
 
@@ -105,5 +112,68 @@ async def context_data(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post('/api/chat')
+async def chat(request: ChatRequest):
+    try:
+        model = request.model
+        apiKey = request.apiKey
+        userquery = request.userquery
+        
+        print('=== STARTING CHAT COMPLETION ===')
+        print(f'Model: {model}')
+        print(f'User Query: {userquery}')
+
+        # Initialize embedding model for vector search
+        embedding_model = Vector_embedder(model, apiKey)
+        print('✓ Embedding model created')
+
+        # Connect to existing vector store
+        vector_db = QdrantVectorStore.from_existing_collection(
+            url="http://localhost:6333",
+            collection_name=f"rag_pdf_{model}",
+            embedding=embedding_model
+        )
+        print('✓ Vector store connected')
+
+        # Perform similarity search
+        search_results = vector_db.similarity_search(query=userquery)
+        print(f'✓ Found {len(search_results)} relevant chunks')
+
+        # Build context from search results
+        context = "\n\n".join([
+            f"Page Content: {result.page_content}\nPage Number: {result.metadata.get('page_label', 'N/A')}\nSource: {result.metadata.get('source', 'N/A')}"
+            for result in search_results
+        ])
+        print('✓ Context built')
+
+        # Create system prompt
+        system_prompt = f"""You are a helpful AI Assistant who answers user queries based on available context retrieved from a PDF file.
+
+You should only answer based on the following context and guide the user to the right page number for more details.
+
+Context:
+{context}"""
+
+        # Get chat completion
+        print('✓ Requesting chat completion...')
+        response = chat_completion(
+            model=model,
+            api_key=apiKey,
+            system_prompt=system_prompt,
+            user_query=userquery
+        )
+        print('✓ Chat completion received')
+
+        print('=== CHAT COMPLETION COMPLETED ===')
+        return {
+            "status": "success",
+            "model": model,
+            "response": response,
+            "chunks_used": len(search_results)
+        }
+
+    except Exception as e:
+        print(f'✗ Error: {str(e)}')
+        raise HTTPException(status_code=500, detail=str(e))
 # if __name__ == "__main__":
 #     uvicorn.run(app, host="0.0.0.0", port=8080)
