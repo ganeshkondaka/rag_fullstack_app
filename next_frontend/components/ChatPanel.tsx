@@ -61,9 +61,9 @@ const ChatPanel = () => {
     }
 
     return (
-        <div className="col-span-8 flex flex-col rounded-3xl border border-zinc-200 bg-white shadow-md overflow-hidden">
+        <div className="col-span-1 md:col-span-8 flex flex-col rounded-3xl border border-zinc-200 bg-white shadow-md overflow-hidden">
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
                 {!isMounted ? (
                     <div className="text-sm text-zinc-500 text-center">
                         Loading...
@@ -82,7 +82,7 @@ const ChatPanel = () => {
                         }`}
                     >
                         <div
-                            className={`max-w-2xl rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm space-y-1
+                            className={`max-w-2xl md:max-w-xl lg:max-w-2xl rounded-2xl px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm leading-relaxed shadow-sm space-y-1
                                 ${
                                     msg.role === 'user'
                                         ? 'bg-orange-600 text-white'
@@ -116,17 +116,17 @@ const ChatPanel = () => {
             {/* Input Area */}
             <form
                 onSubmit={handleSendMessage}
-                className="flex gap-3 border-t border-zinc-200 bg-white p-4"
+                className="flex gap-2 md:gap-3 border-t border-zinc-200 bg-white p-3 md:p-4"
             >
                 <input
                     value={userquery}
                     onChange={(e) => setUserquery(e.target.value)}
                     placeholder="Ask something..."
-                    className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-sm text-black outline-none focus:ring-2 focus:ring-zinc-400"
+                    className="flex-1 rounded-xl border border-zinc-300 px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-black outline-none focus:ring-2 focus:ring-zinc-400"
                 />
                 <button
                     type="submit"
-                    className="rounded-xl bg-black p-3 text-white hover:bg-zinc-900 shadow"
+                    className="rounded-xl bg-black p-2 md:p-3 text-white hover:bg-zinc-900 shadow"
                 >
                     <Send size={18} />
                 </button>

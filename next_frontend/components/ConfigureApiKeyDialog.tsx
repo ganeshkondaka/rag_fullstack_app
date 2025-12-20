@@ -18,8 +18,8 @@ const ConfigureApiKeyDialog: React.FC<Props> = ({ open, onClose }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-white border border-zinc-200 shadow-2xl p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="w-full max-w-sm md:max-w-md rounded-2xl bg-white border border-zinc-200 shadow-2xl p-5 md:p-6">
         <h2 className="text-lg font-semibold text-zinc-900">
           API Configuration
         </h2>

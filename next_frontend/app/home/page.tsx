@@ -78,13 +78,13 @@ const Homepage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-100 to-zinc-200 p-6">
-      <div className="mx-auto max-w-7xl grid grid-cols-12 gap-6 h-[calc(100vh-3rem)]">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-100 to-zinc-200 p-4 md:p-6">
+      <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 md:h-[calc(100vh-3rem)]">
 
         {/* LEFT PANEL */}
         <form
           onSubmit={handleSubmit}
-          className={`col-span-4 rounded-3xl bg-white/90 backdrop-blur border border-zinc-200 shadow-lg p-6 flex flex-col transition-all ${
+          className={`col-span-1 md:col-span-4 rounded-3xl bg-white/90 backdrop-blur border border-zinc-200 shadow-lg p-4 md:p-6 flex flex-col transition-all ${
             isLoading ? 'opacity-50 pointer-events-none' : ''
           }`}
         >
@@ -96,24 +96,24 @@ const Homepage = () => {
                   <div className="w-2 h-8 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                   <div className="w-2 h-8 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
-                <p className="text-white text-sm font-medium">Processing...</p>
+                <p className="text-white text-md font-extrabold">Processing...</p>
               </div>
             </div>
           )}
           <h1 className="text-xl font-semibold text-zinc-900">
             RAG Assistant
           </h1>
-          <p className="text-xs text-zinc-500 mt-1 mb-6">
+          <p className="text-xs text-zinc-500 mt-1 mb-4 md:mb-6">
             Upload a document or crawl a website
           </p>
 
           {/* TOOL BUTTONS – SAME AS ORIGINAL */}
-          <div className="mb-6">
+          <div className="mb-4 md:mb-6">
             <label className="text-xs font-medium text-zinc-600">
               Select mode
             </label>
 
-            <div className="flex gap-3 mt-2">
+            <div className="flex gap-2 md:gap-3 mt-2">
               <button
                 type="button"
                 id="pdf"
@@ -143,7 +143,7 @@ const Homepage = () => {
           </div>
 
           {/* INPUT – SAME STRUCTURE */}
-          <div className="mb-6">
+          <div className="mb-4 md:mb-6">
             <label className="text-xs font-medium text-zinc-600 mb-1 inline-block">
               {tool === 'website'
                 ? 'Website URL to crawl'
@@ -190,8 +190,8 @@ const Homepage = () => {
           <button
             onClick={() => setShowApiDialog(true)}
             type='button'
-            className="rounded-xl border border-zinc-300 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 transition"
-          >
+            className="mb-3 md:mb-4 rounded-xl border border-zinc-300 px-3 md:px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 transition w-full md:w-auto">
+          
             Configure API Key
           </button>
           <div>
@@ -202,7 +202,7 @@ const Homepage = () => {
           <button
             type='submit'
             disabled={isLoading}
-            className={`mt-auto rounded-xl px-4 py-3 text-sm font-medium shadow-md transition ${
+            className={`mt-4 md:mt-auto rounded-xl px-3 md:px-4 py-3 text-sm font-medium shadow-md transition w-full md:w-auto ${
               isLoading
                 ? 'bg-zinc-400 text-gray-600 cursor-not-allowed'
                 : 'bg-black text-white hover:bg-zinc-900'

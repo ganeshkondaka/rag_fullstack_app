@@ -24,6 +24,8 @@ A full-stack RAG application that lets you upload PDFs or websites and chat with
 - Switch between multiple LLM providers at runtime
 - Semantic search with vector embeddings
 - Dark-themed UI with file upload support
+- Fully responsive design for desktop, tablet, and mobile devices
+- Optimized layout that adapts to all screen sizes
 
 ## Setup Locally
 
@@ -128,6 +130,16 @@ Frontend stores API key in localStorage via Configure API Key dialog.
 - API keys are sent from frontend to backend on each request
 - Temporary PDF files are cleaned up after processing
 - Same collection name is reused for uploads with same model (vectors append)
+
+## Responsive Design
+
+The application is fully responsive and optimized for all screen sizes:
+
+- **Desktop (1024px+)**: Side-by-side layout with upload form (left) and chat panel (right)
+- **Tablet (768px-1023px)**: Optimized spacing, touch-friendly buttons, and responsive padding
+- **Mobile (<768px)**: Stacked single-column layout for seamless mobile experience
+
+All components dynamically adjust font sizes, padding, gaps, and spacing using Tailwind's responsive breakpoints (`md:`, `lg:`) to ensure excellent UX across devices.
 
 ## Troubleshooting
 

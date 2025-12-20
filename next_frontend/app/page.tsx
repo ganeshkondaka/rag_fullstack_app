@@ -19,7 +19,7 @@ export default function LandingPage() {
         </p>
 
         {/* Feature points */}
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-orange-600">
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-blue-600">
           <div className="rounded-xl border bg-white p-4 shadow-sm">
             📄 PDF & Website Support
           </div>
