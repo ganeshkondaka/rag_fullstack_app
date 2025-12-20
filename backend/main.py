@@ -68,6 +68,10 @@ async def context_data(
             embedding_model = Vector_embedder(model, apiKey)
             print('✓ Embedding model created')
 
+            # Clean up temp file
+            os.remove(file_path)
+            print('✓ Temporary file cleaned up')
+            
             # Create vector store
             vector_store = QdrantVectorStore.from_documents(
                 documents=split_docs,
@@ -83,8 +87,8 @@ async def context_data(
             result["chunks_created"] = len(split_docs)
 
             # Clean up temp file
-            os.remove(file_path)
-            print('✓ Temporary file cleaned up')
+            # os.remove(file_path)
+            # print('✓ Temporary file cleaned up')
             print('=== PDF PROCESSING COMPLETED ===')
 
         elif tool == 'website' and websiteUrl:
