@@ -19,6 +19,7 @@ class ChatRequest(BaseModel):
     model: str
     apiKey: str
     userquery: str
+    filename: str
 
 app.add_middleware(
      CORSMiddleware,
@@ -85,7 +86,7 @@ async def context_data(
                 documents=split_docs,
                 url="http://localhost:6333",
                 embedding=embedding_model,
-                collection_name=f"rag_pdf_{model}"
+                collection_name=f"rag_pdf_{(file.filename.split('.')[0]).strip().lower().replace(' ', '_')}"
             )
             print('✓ Vector store created/updated')
 
@@ -119,6 +120,7 @@ async def chat(request: ChatRequest):
         model = request.model
         apiKey = request.apiKey
         userquery = request.userquery
+        filename = request.filename
         
         print('=== STARTING CHAT COMPLETION ===')
         print(f'Model: {model}')
@@ -131,7 +133,7 @@ async def chat(request: ChatRequest):
         # Connect to existing vector store
         vector_db = QdrantVectorStore.from_existing_collection(
             url="http://localhost:6333",
-            collection_name=f"rag_pdf_{model}",
+            collection_name=f"rag_pdf_{filename}",
             embedding=embedding_model
         )
         print('✓ Vector store connected')
@@ -175,23 +177,23 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete('/api/delete-collection')
-async def delete_collection(model: str):
+async def delete_collection(filename: str):
     try:
         print('=== STARTING COLLECTION DELETION ===')
-        print(f'Deleting collection: rag_pdf_{model}')
+        print(f'Deleting collection: rag_pdf_{filename}')
         
         # Initialize Qdrant client
         client = QdrantClient(url="http://localhost:6333")
         
         # Delete the collection
-        client.delete_collection(collection_name=f"rag_pdf_{model}")
-        print(f'✓ Collection rag_pdf_{model} deleted successfully')
+        client.delete_collection(collection_name=f"rag_pdf_{filename}")
+        print(f'✓ Collection rag_pdf_{filename} deleted successfully')
         
         print('=== COLLECTION DELETION COMPLETED ===')
         return {
             "status": "success",
-            "message": f"Collection 'rag_pdf_{model}' deleted successfully",
-            "model": model
+            "message": f"Collection 'rag_pdf_{filename}' deleted successfully",
+            "filename": filename
         }
     
     except Exception as e:

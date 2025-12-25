@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Send } from 'lucide-react'
 import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
@@ -15,13 +15,21 @@ const ChatPanel = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [apiKey, setApiKey] = useState<string | null>(null)
     const [model, setModel] = useState<string | null>(null)
+    const [filename, setFilename] = useState<string | null>(null)
     const [isMounted, setIsMounted] = useState(false)
+    const chatEndRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         setApiKey(localStorage.getItem('rag-apiKey'))
         setModel(localStorage.getItem('rag-model'))
+        setFilename(localStorage.getItem('pdf_filename'))
         setIsMounted(true)
     }, [])
+
+    // Auto-scroll to bottom when conversation updates
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [conversation, isLoading])
 
     const markdownComponents = {
         p: ({ node, ...props }: any) => <p className="mb-2" {...props} />,
@@ -48,7 +56,8 @@ const ChatPanel = () => {
             const response = await axios.post('http://localhost:8000/api/chat', {
                 model,
                 apiKey,
-                userquery
+                userquery,
+                filename
             })
 
             // Add AI message
@@ -85,7 +94,7 @@ const ChatPanel = () => {
                             className={`max-w-2xl md:max-w-xl lg:max-w-2xl rounded-2xl px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm leading-relaxed shadow-sm space-y-1
                                 ${
                                     msg.role === 'user'
-                                        ? 'bg-orange-600 text-white'
+                                        ? 'bg-gray-200 text-black'
                                         : 'bg-zinc-600 text-zinc-100'
                                 }`}
                         >
@@ -111,6 +120,7 @@ const ChatPanel = () => {
                         </div>
                     </div>
                 )}
+                <div ref={chatEndRef} />
             </div>
 
             {/* Input Area */}

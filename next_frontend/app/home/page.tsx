@@ -25,6 +25,9 @@ const Homepage = () => {
     const apiKey = localStorage.getItem('rag-apiKey')
     const model = localStorage.getItem('rag-model')
 
+    const filename = (uploadedfile?.name ?? '').split('.')[0].trim().toLowerCase().replace(/ /g, '_')
+    localStorage.setItem('pdf_filename', filename)
+
     if (!apiKey || !model) {
       setShowApiDialog(true)
       alert('Please configure your API keys first.')
@@ -67,7 +70,7 @@ const Homepage = () => {
       })
       console.log('data sent to api formadata is: ', formData)
       alert('Successfully processed!')
-      setUploadedfile(null)
+      // setUploadedfile(null)
       setWebsiteUrl('')
     } catch (error) {
       console.error('Error submitting:', error)
@@ -84,9 +87,8 @@ const Homepage = () => {
         {/* LEFT PANEL */}
         <form
           onSubmit={handleSubmit}
-          className={`col-span-1 md:col-span-4 rounded-3xl bg-white/90 backdrop-blur border border-zinc-200 shadow-lg p-4 md:p-6 flex flex-col transition-all ${
-            isLoading ? 'opacity-50 pointer-events-none' : ''
-          }`}
+          className={`col-span-1 md:col-span-4 rounded-3xl bg-white/90 backdrop-blur border border-zinc-200 shadow-lg p-4 md:p-6 flex flex-col transition-all ${isLoading ? 'opacity-50 pointer-events-none' : ''
+            }`}
         >
           {isLoading && (
             <div className="absolute inset-0 rounded-3xl bg-black/10 backdrop-blur-sm flex items-center justify-center z-50">
@@ -130,12 +132,13 @@ const Homepage = () => {
               <button
                 type="button"
                 id="website"
+                disabled
                 onClick={(e) => handleTool(e, 'website')}
-                className={`flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition
+                className={`flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition 
                   ${tool === 'website'
                     ? 'bg-black text-white shadow-md'
                     : 'bg-zinc-100 text-zinc-700 border border-zinc-300 hover:bg-zinc-200'
-                  }`}
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 WEBSITE
               </button>
@@ -162,12 +165,12 @@ const Homepage = () => {
                 />
               </div>
             ) : (
-              <div className="flex items-center gap-3 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-1 py-3">
+              <div className={`flex items-center gap-3 rounded-xl border border-dashed border-zinc-300 ${uploadedfile ? "bg-green-100" : "bg-zinc-50"} px-1 py-3`}>
                 <label className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-zinc-100 rounded-lg p-2 transition">
                   <Plus className="text-zinc-500" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs text-zinc-700 truncate">
-                      {uploadedfile ? (uploadedfile.name.length>10 ?uploadedfile.name.slice(0,15)+'...pdf':uploadedfile.name) : 'Choose PDF file'}
+                    <div className={`text-xs text-zinc-700 truncate font-bold`}>
+                      {uploadedfile ? (uploadedfile.name.length > 10 ? uploadedfile.name.slice(0, 15) + '...pdf' : uploadedfile.name) : 'Choose PDF file'}
                     </div>
                     <div className="text-xs text-zinc-400">
                       Only .pdf supported
@@ -191,22 +194,21 @@ const Homepage = () => {
             onClick={() => setShowApiDialog(true)}
             type='button'
             className="mb-3 md:mb-4 rounded-xl border border-zinc-300 px-3 md:px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 transition w-full md:w-auto">
-          
+
             Configure API Key
           </button>
           <div>
-            
+
           </div>
 
           {/* SUBMIT */}
           <button
             type='submit'
             disabled={isLoading}
-            className={`mt-4 md:mt-auto rounded-xl px-3 md:px-4 py-3 text-sm font-medium shadow-md transition w-full md:w-auto ${
-              isLoading
-                ? 'bg-zinc-400 text-gray-600 cursor-not-allowed'
-                : 'bg-black text-white hover:bg-zinc-900'
-            }`}
+            className={`mt-4 md:mt-auto rounded-xl px-3 md:px-4 py-3 text-sm font-medium shadow-md transition w-full md:w-auto ${isLoading
+              ? 'bg-zinc-400 text-gray-600 cursor-not-allowed'
+              : 'bg-black text-white hover:bg-zinc-900'
+              }`}
           >
             {isLoading ? 'Processing...' : 'Submit'}
           </button>

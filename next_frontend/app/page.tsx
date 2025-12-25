@@ -20,14 +20,14 @@ export default function LandingPage() {
 
         {/* Feature points */}
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-blue-600">
-          <div className="rounded-xl border bg-white p-4 shadow-sm">
-            📄 PDF & Website Support
+          <div className="rounded-xl border bg-white p-4 shadow-sm text-orange-500 font-extrabold">
+            PDF & Website Support
           </div>
-          <div className="rounded-xl border bg-white p-4 shadow-sm">
-            🔍 Context-aware Answers
+          <div className="rounded-xl border bg-white p-4 shadow-sm text-orange-500 font-extrabold">
+            Context-aware Answers
           </div>
-          <div className="rounded-xl border bg-white p-4 shadow-sm">
-            ⚡ Fast & Simple RAG
+          <div className="rounded-xl border bg-white p-4 shadow-sm text-orange-500 font-extrabold">
+            Fast & Simple RAG
           </div>
         </div>
 

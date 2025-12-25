@@ -23,8 +23,8 @@ const ConfigureApiKeyDialog: React.FC<Props> = ({ open, onClose }) => {
         <h2 className="text-lg font-semibold text-zinc-900">
           API Configuration
         </h2>
-        <p className="text-xs text-zinc-500 mt-1">
-          Keys are stored locally and never logged
+        <p className="text-xs text-yellow-500 mt-1">
+          * Keys are stored locally in your browser.
         </p>
 
         <div className="mt-6 space-y-4">
