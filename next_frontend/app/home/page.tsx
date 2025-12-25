@@ -24,10 +24,27 @@ const Homepage = () => {
     e.preventDefault()
     const apiKey = localStorage.getItem('rag-apiKey')
     const model = localStorage.getItem('rag-model')
+    const existed_file = localStorage.getItem('pdf_filename')
 
+    // Delete the existing file from the database if it exists
+    if (existed_file !== null) {
+      try {
+        const response = await axios.delete('http://localhost:8000/api/delete-collection', { 
+          data: { filename: existed_file } 
+        })
+        console.log('response from deleting collection is: ', response)
+        alert(`${existed_file} pdf deleted successfully!`)
+      } catch (error) {
+        console.error('Error deleting collection:', error)
+      }
+      localStorage.setItem('pdf_filename', '')
+    }
+
+    // Get the filename from the uploaded file
     const filename = (uploadedfile?.name ?? '').split('.')[0].trim().toLowerCase().replace(/ /g, '_')
     localStorage.setItem('pdf_filename', filename)
 
+    // Check if the API keys and model are set
     if (!apiKey || !model) {
       setShowApiDialog(true)
       alert('Please configure your API keys first.')
@@ -81,6 +98,7 @@ const Homepage = () => {
   }
 
   return (
+    /*******  edcb0d93-fd5b-46bd-82c9-872b9b86640d  *******/
     <div className="min-h-screen bg-gradient-to-br from-zinc-100 to-zinc-200 p-4 md:p-6">
       <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 md:h-[calc(100vh-3rem)]">
 

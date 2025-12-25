@@ -21,6 +21,9 @@ class ChatRequest(BaseModel):
     userquery: str
     filename: str
 
+class DeleteCollectionRequest(BaseModel):
+    filename: str
+
 app.add_middleware(
      CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # nextjs dev server port
@@ -177,9 +180,10 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete('/api/delete-collection')
-async def delete_collection(filename: str):
+async def delete_collection(request: DeleteCollectionRequest):
     try:
         print('=== STARTING COLLECTION DELETION ===')
+        filename = request.filename
         print(f'Deleting collection: rag_pdf_{filename}')
         
         # Initialize Qdrant client
