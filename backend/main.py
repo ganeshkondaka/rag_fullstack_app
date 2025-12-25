@@ -15,6 +15,9 @@ from langchain_qdrant import QdrantVectorStore
 load_dotenv()
 app = FastAPI()
 
+qdrant_db = os.getenv('qdrant_cluster_db')
+qdrant_api_key = os.getenv('qdrant_api_key')
+
 class ChatRequest(BaseModel):
     model: str
     apiKey: str
@@ -87,7 +90,8 @@ async def context_data(
             # Create vector store
             vector_store = QdrantVectorStore.from_documents(
                 documents=split_docs,
-                url="http://localhost:6333",
+                url=qdrant_db,
+                api_key=qdrant_api_key,
                 embedding=embedding_model,
                 collection_name=f"rag_pdf_{(file.filename.split('.')[0]).strip().lower().replace(' ', '_')}"
             )
@@ -135,7 +139,8 @@ async def chat(request: ChatRequest):
 
         # Connect to existing vector store
         vector_db = QdrantVectorStore.from_existing_collection(
-            url="http://localhost:6333",
+            url=qdrant_db,
+            api_key=qdrant_api_key,
             collection_name=f"rag_pdf_{filename}",
             embedding=embedding_model
         )
@@ -187,7 +192,7 @@ async def delete_collection(request: DeleteCollectionRequest):
         print(f'Deleting collection: rag_pdf_{filename}')
         
         # Initialize Qdrant client
-        client = QdrantClient(url="http://localhost:6333")
+        client = QdrantClient(url=qdrant_db, api_key=qdrant_api_key)
         
         # Delete the collection
         client.delete_collection(collection_name=f"rag_pdf_{filename}")

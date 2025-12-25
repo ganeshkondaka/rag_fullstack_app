@@ -33,7 +33,7 @@ const Homepage = () => {
           data: { filename: existed_file } 
         })
         console.log('response from deleting collection is: ', response)
-        alert(`${existed_file} pdf deleted successfully!`)
+        alert(`previous file... ${existed_file} pdf deleted successfully!`)
       } catch (error) {
         console.error('Error deleting collection:', error)
       }
@@ -86,7 +86,7 @@ const Homepage = () => {
         },
       })
       console.log('data sent to api formadata is: ', formData)
-      alert('Successfully processed!')
+      alert('PDF Successfully processed!')
       // setUploadedfile(null)
       setWebsiteUrl('')
     } catch (error) {

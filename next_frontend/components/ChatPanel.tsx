@@ -24,7 +24,7 @@ const ChatPanel = () => {
         setModel(localStorage.getItem('rag-model'))
         setFilename(localStorage.getItem('pdf_filename'))
         setIsMounted(true)
-    }, [])
+    }, [filename])
 
     // Auto-scroll to bottom when conversation updates
     useEffect(() => {
@@ -72,7 +72,7 @@ const ChatPanel = () => {
     return (
         <div className="col-span-1 md:col-span-8 flex flex-col rounded-3xl border border-zinc-200 bg-white shadow-md overflow-hidden">
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 md:px-6 space-y-4">
                 {!isMounted ? (
                     <div className="text-sm text-zinc-500 text-center">
                         Loading...
@@ -82,7 +82,7 @@ const ChatPanel = () => {
                         Upload a source and start asking questions.
                     </div>
                 ) : null}
-
+                {filename && <div className=' text-xs px-2 p-1 inline sticky top-[-17px] text-green-400 font-bold bg-zinc-100 rounded-md '> <span className='animate-ping text-green-500 text-lg'>●</span> {filename}.pdf</div>}
                 {conversation.map((msg, index) => (
                     <div
                         key={index}
