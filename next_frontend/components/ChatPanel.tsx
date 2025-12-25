@@ -51,9 +51,9 @@ const ChatPanel = () => {
         setConversation(prev => [...prev, { role: 'user', message: userquery }])
         setUserquery('')
         setIsLoading(true)
-
+        const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
         try {
-            const response = await axios.post('http://localhost:8000/api/chat', {
+            const response = await axios.post(`${BACKEND_URL}/api/chat`, {
                 model,
                 apiKey,
                 userquery,

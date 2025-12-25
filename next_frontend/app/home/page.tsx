@@ -4,6 +4,7 @@ import axios from 'axios'
 import { Link, Plus } from 'lucide-react'
 import ConfigureApiKeyDialog from '@/components/ConfigureApiKeyDialog'
 import ChatPanel from '@/components/ChatPanel'
+import { env } from 'process'
 
 const Homepage = () => {
   const [tool, setTool] = useState('pdf')
@@ -25,12 +26,11 @@ const Homepage = () => {
     const apiKey = localStorage.getItem('rag-apiKey')
     const model = localStorage.getItem('rag-model')
     const existed_file = localStorage.getItem('pdf_filename')
-
-    // Delete the existing file from the database if it exists
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL    // Delete the existing file from the database if it exists
     if (existed_file !== null) {
       try {
-        const response = await axios.delete('http://localhost:8000/api/delete-collection', { 
-          data: { filename: existed_file } 
+        const response = await axios.delete(`${BACKEND_URL}/api/delete-collection`, {
+          data: { filename: existed_file }
         })
         console.log('response from deleting collection is: ', response)
         alert(`previous file... ${existed_file} pdf deleted successfully!`)
@@ -80,7 +80,7 @@ const Homepage = () => {
         formData.append('websiteUrl', websiteUrl)
       }
 
-      const response = await axios.post('http://localhost:8000/api/context', formData, {
+      const response = await axios.post(`${BACKEND_URL}/api/context`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
