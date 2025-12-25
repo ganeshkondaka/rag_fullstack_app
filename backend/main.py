@@ -15,8 +15,22 @@ from langchain_qdrant import QdrantVectorStore
 load_dotenv()
 app = FastAPI()
 
+# Validate required environment variables at startup
 qdrant_db = os.getenv('qdrant_cluster_db')
 qdrant_api_key = os.getenv('qdrant_api_key')
+
+if not qdrant_db or not qdrant_api_key:
+    raise ValueError("Missing required environment variables: qdrant_cluster_db and/or qdrant_api_key")
+
+# CORS configuration - supports both dev and production
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', "http://localhost:3000").split(',')
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class ChatRequest(BaseModel):
     model: str
@@ -26,16 +40,6 @@ class ChatRequest(BaseModel):
 
 class DeleteCollectionRequest(BaseModel):
     filename: str
-
-app.add_middleware(
-     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # nextjs dev server port
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.post('/api/context')
 async def context_data(
     tool: str = Form(...),
     apiKey: str = Form(...),
@@ -68,44 +72,43 @@ async def context_data(
             print('=== STARTING PDF PROCESSING ===')
             # Save uploaded file temporarily
             file_path = f"temp_{file.filename}"
-            with open(file_path, "wb") as buffer:
-                content = await file.read()
-                buffer.write(content)
-            print(f'✓ File saved temporarily: {file_path}')
+            try:
+                with open(file_path, "wb") as buffer:
+                    content = await file.read()
+                    buffer.write(content)
+                print(f'✓ File saved temporarily: {file_path}')
 
-            # Process the PDF-----------------------
-            loaded_docs = Load_pdf(tool, file_path)
-            print(f'✓ PDF loaded: {len(loaded_docs)} documents')
+                # Process the PDF
+                loaded_docs = Load_pdf(tool, file_path)
+                print(f'✓ PDF loaded: {len(loaded_docs)} documents')
 
-            split_docs = Chunk_docs(tool, loaded_docs)
-            print(f'✓ Documents chunked: {len(split_docs)} chunks')
+                split_docs = Chunk_docs(tool, loaded_docs)
+                print(f'✓ Documents chunked: {len(split_docs)} chunks')
 
-            embedding_model = Vector_embedder(model, apiKey)
-            print('✓ Embedding model created')
+                embedding_model = Vector_embedder(model, apiKey)
+                print('✓ Embedding model created')
+                
+                # Create vector store
+                vector_store = QdrantVectorStore.from_documents(
+                    documents=split_docs,
+                    url=qdrant_db,
+                    api_key=qdrant_api_key,
+                    embedding=embedding_model,
+                    collection_name=f"rag_pdf_{(file.filename.split('.')[0]).strip().lower().replace(' ', '_')}"
+                )
+                print('✓ Vector store created/updated')
 
-            # Clean up temp file
-            os.remove(file_path)
-            print('✓ Temporary file cleaned up')
-            
-            # Create vector store
-            vector_store = QdrantVectorStore.from_documents(
-                documents=split_docs,
-                url=qdrant_db,
-                api_key=qdrant_api_key,
-                embedding=embedding_model,
-                collection_name=f"rag_pdf_{(file.filename.split('.')[0]).strip().lower().replace(' ', '_')}"
-            )
-            print('✓ Vector store created/updated')
+                result["file_name"] = file.filename
+                result["file_size"] = len(content)
+                result["message"] = "PDF processed and indexed successfully"
+                result["chunks_created"] = len(split_docs)
+                print('=== PDF PROCESSING COMPLETED ===')
 
-            result["file_name"] = file.filename
-            result["file_size"] = len(content)
-            result["message"] = "PDF processed and indexed successfully"
-            result["chunks_created"] = len(split_docs)
-
-            # Clean up temp file
-            # os.remove(file_path)
-            # print('✓ Temporary file cleaned up')
-            print('=== PDF PROCESSING COMPLETED ===')
+            finally:
+                # Clean up temp file if it exists
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    print('✓ Temporary file cleaned up')
 
         elif tool == 'website' and websiteUrl:
             print('=== STARTING WEBSITE PROCESSING ===')
@@ -209,5 +212,6 @@ async def delete_collection(request: DeleteCollectionRequest):
         print(f'✗ Error: {str(e)}')
         raise HTTPException(status_code=500, detail=str(e))
 
-# if __name__ == "__main__":
-#     uvicorn.run(app, host="0.0.0.0", port=8080)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
