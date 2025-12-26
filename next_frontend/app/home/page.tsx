@@ -1,10 +1,11 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Link, Plus } from 'lucide-react'
 import ConfigureApiKeyDialog from '@/components/ConfigureApiKeyDialog'
 import ChatPanel from '@/components/ChatPanel'
-import { env } from 'process'
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
 
 const Homepage = () => {
   const [tool, setTool] = useState('pdf')
@@ -12,6 +13,22 @@ const Homepage = () => {
   const [uploadedfile, setUploadedfile] = useState<File | null>(null)
   const [showApiDialog, setShowApiDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  // Clean up (delete collection) when component unmounts
+  useEffect(() => {
+    return () => {
+      const existed_file = localStorage.getItem('pdf_filename')
+      if (existed_file && existed_file.trim()) {
+        // Use sendBeacon for reliable requests on page unload
+        const payload = JSON.stringify({ filename: existed_file })
+        navigator.sendBeacon(
+          `${BACKEND_URL}/api/delete-collection`,
+          payload
+        )
+        console.log(`Cleanup: Deleting collection for ${existed_file}`)
+      }
+    }
+  }, [])
 
   const handleTool = (e: React.FormEvent, id: string) => {
     e.preventDefault()
@@ -26,8 +43,10 @@ const Homepage = () => {
     const apiKey = localStorage.getItem('rag-apiKey')
     const model = localStorage.getItem('rag-model')
     const existed_file = localStorage.getItem('pdf_filename')
-    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL    // Delete the existing file from the database if it exists
-    if (existed_file !== null) {
+    console.log('existed_file isssss:', existed_file, typeof existed_file)
+
+    // Delete the existing file from the database if it exists
+    if (existed_file && existed_file.trim()) {
       try {
         const response = await axios.delete(`${BACKEND_URL}/api/delete-collection`, {
           data: { filename: existed_file }
