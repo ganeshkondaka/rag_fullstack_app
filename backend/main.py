@@ -18,10 +18,13 @@ app = FastAPI()
 # Validate required environment variables at startup
 qdrant_db = os.getenv('qdrant_cluster_db')
 qdrant_api_key = os.getenv('qdrant_api_key')
-allowed_origins_str = os.getenv('ALLOWED_ORIGINS')
+allowed_origins_str = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000')
 
 if not qdrant_db or not qdrant_api_key:
     raise ValueError("Missing required environment variables: qdrant_cluster_db and/or qdrant_api_key")
+
+if not allowed_origins_str:
+    raise ValueError("ALLOWED_ORIGINS environment variable is not set")
 
 # Parse multiple origins if comma-separated
 ALLOWED_ORIGINS = [origin.strip() for origin in allowed_origins_str.split(',')]
